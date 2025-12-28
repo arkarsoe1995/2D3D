@@ -7,25 +7,25 @@
     
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    
     <script src="https://cdn.tailwindcss.com"></script>
-    
     <script src="https://unpkg.com/lucide@latest"></script>
 
     <link href="https://fonts.googleapis.com/css2?family=Padauk:wght@400;700&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 
     <style>
+        /* Base Styles */
         body { 
             font-family: 'Padauk', 'Inter', sans-serif; 
             background-color: #0f172a; 
             color: #fff;
-            overflow-x: hidden; 
+            overflow: hidden; /* Prevent body scroll for the app feel */
+            touch-action: none;
         }
         
         /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 4px; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
         ::-webkit-scrollbar-track { background: #1e293b; }
         ::-webkit-scrollbar-thumb { background: #3b82f6; border-radius: 4px; }
 
@@ -42,16 +42,174 @@
             -webkit-backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
-        
-        .number-gradient {
-            background: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
 
         .tab-active {
             color: #3b82f6;
             transform: translateY(-2px);
+        }
+
+        /* =========================================
+           CAL3D SPECIFIC STYLES (Ported from cal3d.html)
+           ========================================= */
+        
+        /* Excel Ribbon */
+        .excel-ribbon {
+            background: #1e293b; /* Dark theme default */
+            border-bottom: 1px solid #334155;
+            padding: 4px 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 40;
+            overflow-x: auto;
+            flex-shrink: 0;
+        }
+        .ribbon-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 2px 8px;
+            border-right: 1px solid #334155;
+        }
+        .ribbon-input {
+            width: 45px;
+            height: 30px;
+            border-radius: 6px;
+            border: 1px solid #475569;
+            text-align: center;
+            font-weight: bold;
+            font-size: 16px;
+            outline: none;
+            background: #0f172a;
+            color: white;
+        }
+        .ribbon-comm {
+            width: 90px;
+            height: 30px;
+            border-radius: 6px;
+            border: 1px solid #475569;
+            padding: 0 8px;
+            font-size: 11px;
+            outline: none;
+            background: #0f172a;
+            color: white;
+        }
+        .color-mini-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+        }
+        .mini-color-btn {
+            width: 16px;
+            height: 16px;
+            border-radius: 3px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        /* Table Viewport */
+        .table-viewport {
+            position: relative;
+            flex: 1;
+            overflow: auto;
+            background: #0f172a;
+            touch-action: pan-x pan-y;
+            height: 100%;
+        }
+        .zoom-wrapper {
+            transform-origin: 0 0;
+            transition: transform 0.1s ease-out;
+            width: max-content;
+        }
+
+        /* Table Cells */
+        .cal-table th, .cal-table td {
+            min-width: 50px; 
+            height: 40px;     
+            text-align: center;
+            font-size: 13px;
+            position: relative;
+        }
+        .cell-box {
+            position: absolute;
+            inset: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 1px 1px 3px rgba(0,0,0,0.5), inset 0.5px 0.5px 0px rgba(255,255,255,0.05);
+            border: 0.5px solid rgba(255,255,255,0.1);
+            background-color: #1e293b; /* Default cell color */
+        }
+        .cell-box.selected {
+            outline: 2px solid #3b82f6;
+            outline-offset: 1px;
+            z-index: 40;
+        }
+
+        .cal-table {
+            border-collapse: separate;
+            border-spacing: 0;
+            width: max-content;
+        }
+
+        /* Sticky Headers */
+        .cal-table thead th {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background-color: #0f172a;
+            border-bottom: 1px solid #334155;
+            font-weight: 900 !important;
+            color: #3b82f6;
+        }
+        .sticky-col {
+            position: sticky;
+            left: 0;
+            z-index: 45;
+            background-color: #0f172a !important;
+            width: 40px !important;
+            min-width: 40px !important;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.2);
+            border-right: 1px solid #334155;
+            font-weight: 900 !important;
+        }
+        .sticky-corner {
+            position: sticky;
+            top: 0;
+            left: 0;
+            z-index: 60;
+            background-color: #0f172a !important;
+        }
+
+        /* SVG Path Lines */
+        #path-svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: 30;
+            overflow: visible;
+        }
+        .connection-line {
+            fill: none;
+            stroke: #f59e0b;
+            stroke-width: 3;
+            stroke-dasharray: 8, 4;
+            animation: dash 20s linear infinite;
+            opacity: 0.7;
+        }
+        @keyframes dash { to { stroke-dashoffset: -500; } }
+
+        .comment-dot {
+            position: absolute;
+            top: 3px;
+            right: 3px;
+            width: 6px;
+            height: 6px;
+            background: #ef4444;
+            border-radius: 50%;
+            border: 1px solid white;
         }
     </style>
 </head>
@@ -62,32 +220,11 @@
         const { useState, useEffect, useRef, useMemo } = React;
 
         // ==========================================
-        // UTILS & MOCK DATA
-        // ==========================================
-        
-        // 3D Grid Generation Logic (Adapted from cal3d.html)
-        const generate3DGrid = (year) => {
-            const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-            const data = [];
-            // Simulating the formula results from the uploaded file
-            months.forEach((m, index) => {
-                data.push({
-                    month: m,
-                    dates: [
-                        { day: "1", val: Math.floor(Math.random() * 999).toString().padStart(3, '0'), isWin: Math.random() > 0.8 },
-                        { day: "16", val: Math.floor(Math.random() * 999).toString().padStart(3, '0'), isWin: Math.random() > 0.8 }
-                    ]
-                });
-            });
-            return data;
-        };
-
-        // ==========================================
         // UI COMPONENTS
         // ==========================================
         
         const Icon = ({ name, size = 20, className }) => {
-            useEffect(() => { lucide.createIcons(); }, [name]);
+            useEffect(() => { if(window.lucide) window.lucide.createIcons(); }, [name]);
             return <i data-lucide={name} style={{ width: size, height: size }} className={`inline-block ${className}`}></i>;
         };
 
@@ -96,7 +233,6 @@
             const styles = {
                 primary: "bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-lg shadow-blue-500/30",
                 secondary: "bg-slate-700 text-white hover:bg-slate-600",
-                danger: "bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-500 hover:text-white",
                 ghost: "bg-transparent text-slate-400 hover:text-white"
             };
             return (
@@ -107,17 +243,14 @@
         };
 
         // ==========================================
-        // PAGES
+        // AUTH PAGE
         // ==========================================
-
-        // --- AUTH PAGE ---
         const AuthPage = ({ onLogin }) => {
             const [phone, setPhone] = useState("");
             const [name, setName] = useState("");
 
             return (
-                <div className="min-h-screen flex flex-col items-center justify-center p-6 relative overflow-hidden">
-                    {/* Background decoration */}
+                <div className="min-h-screen flex flex-col items-center justify-center p-6 relative overflow-hidden bg-slate-900">
                     <div className="absolute top-0 left-0 w-64 h-64 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 -translate-x-1/2 -translate-y-1/2 animate-blob"></div>
                     <div className="absolute bottom-0 right-0 w-64 h-64 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 translate-x-1/2 translate-y-1/2 animate-blob animation-delay-2000"></div>
 
@@ -129,199 +262,322 @@
                             <h1 className="text-2xl font-bold text-white mb-1">အကောင့်ဝင်ရန်</h1>
                             <p className="text-slate-400 text-sm">Pro System သို့ ကြိုဆိုပါသည်</p>
                         </div>
-
                         <div className="space-y-4">
                             <div>
                                 <label className="text-xs text-slate-400 uppercase font-bold ml-1 mb-1 block">အမည်</label>
-                                <input 
-                                    value={name} onChange={e => setName(e.target.value)}
-                                    className="w-full bg-slate-800/50 border border-slate-700 rounded-xl p-3 text-white focus:outline-none focus:border-blue-500 transition-colors"
-                                    placeholder="Mg Mg"
-                                />
+                                <input value={name} onChange={e => setName(e.target.value)} className="w-full bg-slate-800/50 border border-slate-700 rounded-xl p-3 text-white focus:outline-none focus:border-blue-500 transition-colors" placeholder="Mg Mg" />
                             </div>
                             <div>
                                 <label className="text-xs text-slate-400 uppercase font-bold ml-1 mb-1 block">ဖုန်းနံပါတ်</label>
-                                <input 
-                                    type="tel" value={phone} onChange={e => setPhone(e.target.value)}
-                                    className="w-full bg-slate-800/50 border border-slate-700 rounded-xl p-3 text-white focus:outline-none focus:border-blue-500 transition-colors"
-                                    placeholder="09xxxxxxxxx"
-                                />
+                                <input type="tel" value={phone} onChange={e => setPhone(e.target.value)} className="w-full bg-slate-800/50 border border-slate-700 rounded-xl p-3 text-white focus:outline-none focus:border-blue-500 transition-colors" placeholder="09xxxxxxxxx" />
                             </div>
-                            <Button onClick={() => name && phone ? onLogin({name, phone, coins: 5000}) : null} className="w-full mt-4">
-                                စတင်အသုံးပြုမယ် <Icon name="arrow-right" size={18} />
-                            </Button>
+                            <Button onClick={() => name && phone ? onLogin({name, phone, coins: 5000}) : null} className="w-full mt-4">စတင်အသုံးပြုမယ်</Button>
                         </div>
                     </div>
                 </div>
             );
         };
 
-        // --- LIVE 2D PAGE (Logic from live2d.html) ---
+        // ==========================================
+        // LIVE 2D PAGE
+        // ==========================================
         const LivePage = () => {
             const [data, setData] = useState({ live: { set: "0.00", value: "0.00", twod: "--" }, result: [] });
             const [loading, setLoading] = useState(true);
-            const [error, setError] = useState(false);
 
             useEffect(() => {
                 const fetchData = async () => {
                     try {
-                        // Using the API from the uploaded file
                         const res = await fetch('https://api.thaistock2d.com/live');
                         const json = await res.json();
                         setData(json);
-                        setError(false);
-                    } catch (e) {
-                        setError(true);
-                        console.error(e);
-                    } finally {
-                        setLoading(false);
-                    }
+                    } catch (e) { console.error(e); } finally { setLoading(false); }
                 };
-
                 fetchData();
-                const interval = setInterval(fetchData, 2000); // 2 seconds refresh for "Live" feel
+                const interval = setInterval(fetchData, 2000);
                 return () => clearInterval(interval);
             }, []);
 
             return (
-                <div className="pb-24 pt-4 px-4 space-y-6 animate-fade-in">
-                    {/* Live Status Header */}
+                <div className="pb-24 pt-4 px-4 space-y-6 overflow-y-auto h-full">
                     <div className="flex justify-between items-end">
-                        <div>
-                            <h2 className="text-2xl font-bold text-white">Live 2D</h2>
-                            <p className="text-slate-400 text-xs">{new Date().toDateString()}</p>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <span className="relative flex h-3 w-3">
-                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                              <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
-                            </span>
-                            <span className="text-xs text-green-400 font-bold tracking-wider">ONLINE</span>
-                        </div>
+                        <div><h2 className="text-2xl font-bold text-white">Live 2D</h2><p className="text-slate-400 text-xs">{new Date().toDateString()}</p></div>
+                        <div className="flex items-center gap-2"><span className="relative flex h-3 w-3"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span><span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span></span><span className="text-xs text-green-400 font-bold tracking-wider">ONLINE</span></div>
                     </div>
-
-                    {/* Main Live Card - Design from live2d.html but modernized */}
                     <div className="glass-panel rounded-3xl p-1 relative overflow-hidden group">
                         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-cyan-400 to-blue-500 animate-loading"></div>
                         <div className="bg-slate-900/90 rounded-[22px] p-6 text-center relative z-10">
                             <p className="text-slate-400 text-sm font-medium mb-4">SET Index</p>
-                            
                             <div className="flex justify-center items-end gap-1 mb-2">
-                                <h1 className="text-7xl font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-slate-400 tracking-tighter">
-                                    {data.live.twod}
-                                </h1>
+                                <h1 className="text-7xl font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-slate-400 tracking-tighter">{data.live.twod}</h1>
                             </div>
-                            
                             <div className="flex justify-center gap-4 mt-6">
-                                <div className="bg-slate-800 rounded-xl p-3 w-full">
-                                    <p className="text-[10px] text-slate-500 uppercase font-bold">Set</p>
-                                    <p className="text-xl font-bold text-cyan-400">{data.live.set}</p>
-                                </div>
-                                <div className="bg-slate-800 rounded-xl p-3 w-full">
-                                    <p className="text-[10px] text-slate-500 uppercase font-bold">Value</p>
-                                    <p className="text-xl font-bold text-cyan-400">{data.live.value}</p>
-                                </div>
+                                <div className="bg-slate-800 rounded-xl p-3 w-full"><p className="text-[10px] text-slate-500 uppercase font-bold">Set</p><p className="text-xl font-bold text-cyan-400">{data.live.set}</p></div>
+                                <div className="bg-slate-800 rounded-xl p-3 w-full"><p className="text-[10px] text-slate-500 uppercase font-bold">Value</p><p className="text-xl font-bold text-cyan-400">{data.live.value}</p></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // ==========================================
+        // 3D CALENDAR PAGE (Ported Logic from cal3d.html)
+        // ==========================================
+        const ThreeDPage = () => {
+            const API_URL = 'https://sheetdb.io/api/v1/x9azbgwzmy3a7';
+            const VIBRANT_COLORS = ['#ef4444', '#f97316', '#f59e0b', '#eab308', '#84cc16', '#22c55e', '#10b981', '#06b6d4', '#0ea5e9', '#3b82f6', '#6366f1', '#8b5cf6', '#a855f7', '#d946ef'];
+
+            const [data, setData] = useState([]);
+            const [loading, setLoading] = useState(true);
+            const [selectedId, setSelectedId] = useState(null);
+            const [styles, setStyles] = useState({});
+            const [comments, setComments] = useState({});
+            const [search, setSearch] = useState("");
+            const [lineCoords, setLineCoords] = useState([]);
+            const [zoom, setZoom] = useState(1);
+            
+            const tableRef = useRef(null);
+            const initialDist = useRef(null);
+
+            // Fetch Data Logic
+            useEffect(() => {
+                const load = async () => {
+                    const cached = localStorage.getItem('la_data');
+                    if (cached) setData(JSON.parse(cached));
+                    setStyles(JSON.parse(localStorage.getItem('la_styles') || '{}'));
+                    setComments(JSON.parse(localStorage.getItem('la_comments') || '{}'));
+                    try {
+                        const res = await fetch(API_URL);
+                        const json = await res.json();
+                        if (Array.isArray(json)) {
+                            setData(json);
+                            localStorage.setItem('la_data', JSON.stringify(json));
+                        }
+                    } catch (e) { console.error(e); } finally { setLoading(false); }
+                };
+                load();
+            }, []);
+
+            // Helper: Contrast Text Color
+            const getContrastYIQ = (hexcolor) => {
+                if (!hexcolor) return 'inherit';
+                hexcolor = hexcolor.replace("#", "");
+                const r = parseInt(hexcolor.substr(0, 2), 16);
+                const g = parseInt(hexcolor.substr(2, 2), 16);
+                const b = parseInt(hexcolor.substr(4, 2), 16);
+                const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+                return (yiq >= 128) ? '#000000' : '#ffffff';
+            };
+
+            // Organize Data Memo
+            const organized = useMemo(() => {
+                const map = {};
+                data.forEach(item => {
+                    const d = new Date(item.date);
+                    const y = d.getFullYear();
+                    if (!map[y]) map[y] = Array(24).fill(null);
+                    const idx = d.getMonth() * 2 + (d.getDate() >= 16 ? 1 : 0);
+                    map[y][idx] = String(item.number || "");
+                });
+                let years = Object.keys(map).sort((a, b) => Number(a) - Number(b)).map(Number);
+                if (years.length === 0) years = [new Date().getFullYear()];
+                const next = years[years.length - 1] + 1;
+                if (!map[next]) map[next] = Array(24).fill(null);
+                years.push(next);
+                return { map, years };
+            }, [data]);
+
+            const activeNum = useMemo(() => {
+                if (search) return search;
+                if (!selectedId) return null;
+                const [y, r] = selectedId.split('-');
+                return organized.map[y]?.[r];
+            }, [selectedId, organized, search]);
+
+            const pathSummary = useMemo(() => {
+                if (!activeNum) return null;
+                const matches = [];
+                organized.years.forEach(y => {
+                    organized.map[y]?.forEach((val, r) => {
+                        if (val === activeNum) matches.push({ year: y, round: r + 1 });
+                    });
+                });
+                return matches;
+            }, [activeNum, organized]);
+
+            // Custom Zoom Handler
+            const handleTouchMove = (e) => {
+                if (e.touches.length === 2) {
+                    const dist = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
+                    if (initialDist.current == null) {
+                        initialDist.current = dist;
+                    } else {
+                        const factor = dist / initialDist.current;
+                        setZoom(prev => Math.min(Math.max(0.5, prev * factor), 3));
+                        initialDist.current = dist;
+                    }
+                }
+            };
+            const handleTouchEnd = () => { initialDist.current = null; };
+
+            // Update SVG Lines
+            const updateLines = () => {
+                if (!activeNum || !tableRef.current) { setLineCoords([]); return; }
+                const coords = [];
+                organized.years.forEach(y => {
+                    organized.map[y]?.forEach((val, r) => {
+                        if (val === activeNum) {
+                            const cell = tableRef.current.querySelector(`[data-id="${y}-${r}"]`);
+                            if (cell) {
+                                coords.push({
+                                    x: cell.offsetLeft + cell.offsetWidth / 2,
+                                    y: cell.offsetTop + cell.offsetHeight / 2
+                                });
+                            }
+                        }
+                    });
+                });
+                setLineCoords(coords);
+            };
+
+            useEffect(() => {
+                updateLines();
+                window.addEventListener('resize', updateLines);
+                return () => window.removeEventListener('resize', updateLines);
+            }, [activeNum, organized, zoom]);
+
+            useEffect(() => { if(window.lucide) window.lucide.createIcons(); }, [activeNum, loading]);
+
+            const saveQuickEdit = (id, num, comm, color) => {
+                if (!id) return;
+                const [y, r] = id.split('-');
+                const newComms = { ...comments, [id]: comm };
+                const newStyles = { ...styles, [id]: color };
+                setComments(newComms);
+                setStyles(newStyles);
+                localStorage.setItem('la_comments', JSON.stringify(newComms));
+                localStorage.setItem('la_styles', JSON.stringify(newStyles));
+                
+                const newData = [...data];
+                const dateStr = `${y}-${String(Math.floor(r/2)+1).padStart(2,'0')}-${Number(r)%2===0?'01':'16'}`;
+                const idx = newData.findIndex(d => d.date === dateStr);
+                if (idx > -1) newData[idx].number = num;
+                else newData.push({ date: dateStr, number: num });
+                setData(newData);
+                localStorage.setItem('la_data', JSON.stringify(newData));
+            };
+
+            if (loading && data.length === 0) return <div className="h-full flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div></div>;
+
+            return (
+                <div className="flex flex-col h-full bg-slate-900" onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}>
+                    {/* 3D Header Controls (Zoom + Search) */}
+                    <div className="px-4 py-2 flex justify-between items-center border-b border-slate-700 bg-slate-900 flex-shrink-0">
+                        <div className="flex items-center gap-2">
+                             <div className="flex items-center gap-1 px-2 py-1 rounded-lg border border-slate-700 bg-slate-800">
+                                <i data-lucide="search" className="w-3 h-3 text-blue-500"></i>
+                                <input type="number" placeholder="Find" className="bg-transparent outline-none w-12 font-bold text-sm text-white" value={search} onChange={e => setSearch(e.target.value)} />
+                            </div>
+                        </div>
+                        <div className="flex gap-2">
+                            <button onClick={() => setZoom(prev => Math.max(0.5, prev - 0.1))} className="p-1 rounded bg-slate-800 text-white"><i data-lucide="zoom-out" className="w-4 h-4"></i></button>
+                            <button onClick={() => setZoom(prev => Math.min(3, prev + 0.1))} className="p-1 rounded bg-slate-800 text-white"><i data-lucide="zoom-in" className="w-4 h-4"></i></button>
+                        </div>
+                    </div>
+
+                    {/* Excel Ribbon */}
+                    <div className="excel-ribbon no-scrollbar">
+                        <div className="ribbon-group">
+                            <input className="ribbon-input" placeholder="--" value={selectedId ? (organized.map[selectedId.split('-')[0]]?.[selectedId.split('-')[1]] || "") : ""} onChange={(e) => saveQuickEdit(selectedId, e.target.value, comments[selectedId] || "", styles[selectedId] || "")} disabled={!selectedId} />
+                        </div>
+                        <div className="ribbon-group">
+                            <input className="ribbon-comm" placeholder="Note..." value={selectedId ? (comments[selectedId] || "") : ""} onChange={(e) => saveQuickEdit(selectedId, organized.map[selectedId.split('-')[0]]?.[selectedId.split('-')[1]] || "", e.target.value, styles[selectedId] || "")} disabled={!selectedId} />
+                        </div>
+                        <div className="ribbon-group !border-none">
+                            <div className="color-mini-grid">
+                                {VIBRANT_COLORS.map(c => (
+                                    <button key={c} onClick={() => saveQuickEdit(selectedId, organized.map[selectedId.split('-')[0]]?.[selectedId.split('-')[1]] || "", comments[selectedId] || "", c)} className="mini-color-btn shadow-sm" style={{ background: c }} disabled={!selectedId}></button>
+                                ))}
+                                <button onClick={() => saveQuickEdit(selectedId, organized.map[selectedId.split('-')[0]]?.[selectedId.split('-')[1]] || "", comments[selectedId] || "", "")} className="mini-color-btn flex items-center justify-center bg-slate-700" disabled={!selectedId}><i data-lucide="eraser" className="w-2.5 h-2.5 text-slate-400"></i></button>
                             </div>
                         </div>
                     </div>
 
-                    {/* History Table */}
-                    <div className="glass-panel rounded-2xl overflow-hidden">
-                        <div className="p-4 border-b border-slate-700/50 bg-slate-800/50">
-                            <h3 className="font-bold text-slate-200 flex items-center gap-2">
-                                <Icon name="clock" size={16} /> ယနေ့မှတ်တမ်း
-                            </h3>
+                    {/* Path Summary */}
+                    {activeNum && pathSummary && pathSummary.length > 0 && (
+                        <div className="px-3 py-1 flex items-center gap-2 overflow-x-auto no-scrollbar flex-shrink-0 bg-slate-900 border-b border-slate-800">
+                            <div className="text-lg font-black text-amber-500 px-2 bg-amber-900/30 rounded">{activeNum}</div>
+                            <div className="flex gap-1">
+                                {pathSummary.map((m, idx) => (
+                                    <div key={idx} className="whitespace-nowrap px-1.5 py-0.5 rounded text-[8px] font-black border bg-slate-800 border-slate-700 text-slate-300">{m.year}/{m.round}</div>
+                                ))}
+                            </div>
                         </div>
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-sm text-left text-slate-400">
-                                <thead className="text-xs text-slate-500 uppercase bg-slate-900/50">
+                    )}
+
+                    {/* Table Viewport */}
+                    <div className="table-viewport no-scrollbar">
+                        <div className="zoom-wrapper" style={{ transform: `scale(${zoom})` }}>
+                            <svg id="path-svg" width={tableRef.current?.scrollWidth || 0} height={tableRef.current?.scrollHeight || 0}>
+                                {lineCoords.length > 1 && (<path className="connection-line" d={`M ${lineCoords[0].x} ${lineCoords[0].y} ${lineCoords.slice(1).map(c => `L ${c.x} ${c.y}`).join(' ')}`} />)}
+                                {lineCoords.map((c, i) => <circle key={i} cx={c.x} cy={c.y} r="3" fill="#f59e0b" />)}
+                            </svg>
+                            
+                            <table ref={tableRef} className="cal-table">
+                                <thead>
                                     <tr>
-                                        <th className="px-4 py-3">Time</th>
-                                        <th className="px-4 py-3">Set</th>
-                                        <th className="px-4 py-3">Value</th>
-                                        <th className="px-4 py-3 text-right">Result</th>
+                                        <th className="sticky-corner sticky-col z-[60] text-blue-500">No</th>
+                                        {organized.years.map(y => <th key={y} className="text-blue-500">{y}</th>)}
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {data.result && data.result.map((row, idx) => (
-                                        <tr key={idx} className="border-b border-slate-800/50 hover:bg-slate-800/30 transition-colors">
-                                            <td className="px-4 py-3 font-medium">{row.open_time}</td>
-                                            <td className="px-4 py-3">{row.set}</td>
-                                            <td className="px-4 py-3">{row.value}</td>
-                                            <td className="px-4 py-3 text-right">
-                                                <span className="text-white font-bold bg-blue-600/20 px-2 py-1 rounded text-xs border border-blue-500/30">
-                                                    {row.twod}
-                                                </span>
+                                    {Array.from({ length: 24 }).map((_, rIdx) => (
+                                        <tr key={rIdx}>
+                                            <td className="sticky-col">
+                                                <div className="flex flex-col leading-none">
+                                                    <span className="text-xs font-black text-slate-300">{rIdx + 1}</span>
+                                                    <span className="text-[6px] opacity-50 text-slate-400">{rIdx % 2 === 0 ? '၁' : '၁၆'}</span>
+                                                </div>
                                             </td>
+                                            {organized.years.map(y => {
+                                                const id = `${y}-${rIdx}`;
+                                                const num = organized.map[y]?.[rIdx];
+                                                const isFocused = selectedId === id;
+                                                const isHighlighted = (activeNum && num === activeNum && num !== "");
+                                                const cellColor = styles[id] || "#1e293b";
+                                                const textColor = isFocused || isHighlighted ? '#ffffff' : getContrastYIQ(cellColor);
+
+                                                return (
+                                                    <td key={y} data-id={id} onClick={() => setSelectedId(id)}>
+                                                        <div className={`cell-box ${isFocused ? 'selected' : ''}`} style={{ backgroundColor: isFocused || isHighlighted ? '#2563eb' : cellColor, color: textColor }}>
+                                                            <span className="font-bold tracking-tighter">{num || <span className="opacity-0">.</span>}</span>
+                                                            {comments[id] && <div className="comment-dot"></div>}
+                                                        </div>
+                                                    </td>
+                                                );
+                                            })}
                                         </tr>
                                     ))}
-                                    {loading && <tr><td colSpan="4" className="text-center py-4">Loading...</td></tr>}
                                 </tbody>
                             </table>
                         </div>
                     </div>
+                    {/* Padding for Bottom Nav */}
+                    <div className="h-24 flex-shrink-0"></div> 
                 </div>
             );
         };
 
-        // --- 3D CALENDAR PAGE (Logic from cal3d.html) ---
-        const ThreeDPage = () => {
-            const [year, setYear] = useState(2025);
-            const gridData = useMemo(() => generate3DGrid(year), [year]);
-
-            return (
-                <div className="pb-24 pt-4 px-4 space-y-4">
-                    {/* Header Controls */}
-                    <div className="flex justify-between items-center mb-2">
-                        <h2 className="text-2xl font-bold">3D Calendar</h2>
-                        <div className="flex bg-slate-800 rounded-lg p-1 gap-1">
-                            {[2023, 2024, 2025].map(y => (
-                                <button 
-                                    key={y} onClick={() => setYear(y)}
-                                    className={`px-3 py-1 rounded-md text-xs font-bold transition-all ${year === y ? 'bg-blue-600 text-white shadow' : 'text-slate-400 hover:text-white'}`}
-                                >
-                                    {y}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Grid View (Mobile optimized version of the Excel file) */}
-                    <div className="grid grid-cols-1 gap-3">
-                        {gridData.map((monthData, idx) => (
-                            <div key={idx} className="glass-panel p-4 rounded-xl flex items-center justify-between border-l-4 border-blue-500 hover:translate-x-1 transition-transform">
-                                <div className="flex flex-col items-center justify-center w-12 bg-slate-800 rounded-lg py-2">
-                                    <span className="text-xs text-slate-500 font-bold uppercase">{monthData.month}</span>
-                                    <span className="text-lg font-bold text-white">{idx + 1}</span>
-                                </div>
-                                
-                                <div className="flex-1 flex justify-around items-center pl-4">
-                                    {monthData.dates.map((d, i) => (
-                                        <div key={i} className="text-center">
-                                            <p className="text-[10px] text-slate-400 mb-1">{d.day} ရက်</p>
-                                            <div className={`text-xl font-bold tracking-widest ${d.isWin ? 'text-green-400' : 'text-white'}`}>
-                                                {d.val}
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            );
-        };
-
-        // --- HOME / WALLET PAGE ---
+        // ==========================================
+        // HOME PAGE
+        // ==========================================
         const HomePage = ({ user, setUser }) => {
             const [amount, setAmount] = useState("");
             const [num, setNum] = useState("");
-
             const handleBet = () => {
                 if(!amount || !num) return;
                 if(parseInt(amount) > user.coins) return alert("လက်ကျန်ငွေမလုံလောက်ပါ");
-                
-                // Deduct coins and update logic
                 const newCoins = user.coins - parseInt(amount);
                 setUser({...user, coins: newCoins});
                 setAmount("");
@@ -330,73 +586,29 @@
             };
 
             return (
-                <div className="pb-24 pt-4 px-4 space-y-6">
-                    {/* Wallet Card */}
+                <div className="pb-24 pt-4 px-4 space-y-6 overflow-y-auto h-full">
                     <div className="w-full bg-gradient-to-br from-blue-600 to-indigo-700 rounded-3xl p-6 text-white shadow-xl shadow-blue-900/40 relative overflow-hidden">
-                        <div className="absolute top-0 right-0 p-4 opacity-10">
-                            <Icon name="wallet" size={120} />
-                        </div>
+                        <div className="absolute top-0 right-0 p-4 opacity-10"><Icon name="wallet" size={120} /></div>
                         <div className="relative z-10">
                             <p className="text-blue-200 text-sm font-medium mb-1">လက်ကျန်ငွေ (Balance)</p>
-                            <h2 className="text-4xl font-bold tracking-tight mb-6">
-                                {user.coins.toLocaleString()} <span className="text-lg font-normal opacity-70">Ks</span>
-                            </h2>
+                            <h2 className="text-4xl font-bold tracking-tight mb-6">{user.coins.toLocaleString()} <span className="text-lg font-normal opacity-70">Ks</span></h2>
                             <div className="flex gap-3">
-                                <button className="bg-white/20 hover:bg-white/30 backdrop-blur-md px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-all">
-                                    <Icon name="plus-circle" size={16} /> ငွေဖြည့်မည်
-                                </button>
-                                <button className="bg-white/20 hover:bg-white/30 backdrop-blur-md px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-all">
-                                    <Icon name="history" size={16} /> မှတ်တမ်း
-                                </button>
+                                <button className="bg-white/20 hover:bg-white/30 backdrop-blur-md px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-all"><Icon name="plus-circle" size={16} /> ငွေဖြည့်မည်</button>
+                                <button className="bg-white/20 hover:bg-white/30 backdrop-blur-md px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-all"><Icon name="history" size={16} /> မှတ်တမ်း</button>
                             </div>
                         </div>
                     </div>
-
-                    {/* Quick Betting Panel */}
                     <div className="glass-panel p-5 rounded-2xl">
-                        <div className="flex items-center gap-2 mb-4 border-b border-white/10 pb-3">
-                            <Icon name="zap" size={20} className="text-yellow-400" />
-                            <h3 className="font-bold text-lg">အမြန်ထိုးရန်</h3>
-                        </div>
-                        
+                        <div className="flex items-center gap-2 mb-4 border-b border-white/10 pb-3"><Icon name="zap" size={20} className="text-yellow-400" /><h3 className="font-bold text-lg">အမြန်ထိုးရန်</h3></div>
                         <div className="flex gap-3 mb-4">
-                            <div className="flex-1">
-                                <label className="text-xs text-slate-400 mb-1 block">နံပါတ်</label>
-                                <input 
-                                    type="text" maxLength="3" placeholder="99" 
-                                    value={num} onChange={e => setNum(e.target.value)}
-                                    className="w-full bg-slate-900/50 border border-slate-700 text-center text-2xl font-bold p-3 rounded-xl focus:border-blue-500 focus:outline-none text-white tracking-widest"
-                                />
-                            </div>
-                            <div className="flex-1">
-                                <label className="text-xs text-slate-400 mb-1 block">ပမာဏ</label>
-                                <input 
-                                    type="number" placeholder="1000" 
-                                    value={amount} onChange={e => setAmount(e.target.value)}
-                                    className="w-full bg-slate-900/50 border border-slate-700 text-center text-xl font-bold p-3 rounded-xl focus:border-blue-500 focus:outline-none text-white"
-                                />
-                            </div>
+                            <div className="flex-1"><label className="text-xs text-slate-400 mb-1 block">နံပါတ်</label><input type="text" maxLength="3" placeholder="99" value={num} onChange={e => setNum(e.target.value)} className="w-full bg-slate-900/50 border border-slate-700 text-center text-2xl font-bold p-3 rounded-xl focus:border-blue-500 focus:outline-none text-white tracking-widest" /></div>
+                            <div className="flex-1"><label className="text-xs text-slate-400 mb-1 block">ပမာဏ</label><input type="number" placeholder="1000" value={amount} onChange={e => setAmount(e.target.value)} className="w-full bg-slate-900/50 border border-slate-700 text-center text-xl font-bold p-3 rounded-xl focus:border-blue-500 focus:outline-none text-white" /></div>
                         </div>
-                        
-                        <Button onClick={handleBet} className="w-full py-4 text-lg animate-pulse-glow">
-                            ထိုးမည်
-                        </Button>
+                        <Button onClick={handleBet} className="w-full py-4 text-lg animate-pulse-glow">ထိုးမည်</Button>
                     </div>
-
-                    {/* Services Grid */}
                     <div className="grid grid-cols-2 gap-3">
-                        <div className="glass-panel p-4 rounded-xl flex flex-col items-center justify-center gap-2 hover:bg-slate-800/50 transition-colors cursor-pointer">
-                            <div className="bg-green-500/20 p-3 rounded-full text-green-400">
-                                <Icon name="phone" size={24} />
-                            </div>
-                            <span className="text-sm font-bold">Viber</span>
-                        </div>
-                        <div className="glass-panel p-4 rounded-xl flex flex-col items-center justify-center gap-2 hover:bg-slate-800/50 transition-colors cursor-pointer">
-                            <div className="bg-blue-500/20 p-3 rounded-full text-blue-400">
-                                <Icon name="facebook" size={24} />
-                            </div>
-                            <span className="text-sm font-bold">Facebook</span>
-                        </div>
+                        <div className="glass-panel p-4 rounded-xl flex flex-col items-center justify-center gap-2 hover:bg-slate-800/50 transition-colors cursor-pointer"><div className="bg-green-500/20 p-3 rounded-full text-green-400"><Icon name="phone" size={24} /></div><span className="text-sm font-bold">Viber</span></div>
+                        <div className="glass-panel p-4 rounded-xl flex flex-col items-center justify-center gap-2 hover:bg-slate-800/50 transition-colors cursor-pointer"><div className="bg-blue-500/20 p-3 rounded-full text-blue-400"><Icon name="facebook" size={24} /></div><span className="text-sm font-bold">Facebook</span></div>
                     </div>
                 </div>
             );
@@ -410,10 +622,7 @@
             const [activeTab, setActiveTab] = useState("home");
             const [loading, setLoading] = useState(true);
 
-            // Simulate Splash Screen
-            useEffect(() => {
-                setTimeout(() => setLoading(false), 2000);
-            }, []);
+            useEffect(() => { setTimeout(() => setLoading(false), 2000); }, []);
 
             if (loading) return (
                 <div className="h-screen w-full flex flex-col items-center justify-center bg-slate-950 text-white">
@@ -430,43 +639,34 @@
                     case "home": return <HomePage user={user} setUser={setUser} />;
                     case "live": return <LivePage />;
                     case "3d": return <ThreeDPage />;
-                    case "profile": return (
-                        <div className="h-full flex items-center justify-center text-slate-500">
-                            Coming Soon...
-                        </div>
-                    );
+                    case "profile": return <div className="h-full flex items-center justify-center text-slate-500">Coming Soon...</div>;
                     default: return <HomePage />;
                 }
             };
 
             const NavItem = ({ id, icon, label }) => (
-                <button 
-                    onClick={() => setActiveTab(id)}
-                    className={`flex flex-col items-center justify-center w-full py-2 transition-all duration-300 ${activeTab === id ? 'tab-active' : 'text-slate-500 hover:text-slate-300'}`}
-                >
+                <button onClick={() => setActiveTab(id)} className={`flex flex-col items-center justify-center w-full py-2 transition-all duration-300 ${activeTab === id ? 'tab-active' : 'text-slate-500 hover:text-slate-300'}`}>
                     <Icon name={icon} size={24} className={activeTab === id ? "fill-blue-500/20" : ""} />
                     <span className="text-[10px] font-bold mt-1">{label}</span>
                 </button>
             );
 
             return (
-                <div className="bg-slate-900 min-h-screen max-w-md mx-auto relative shadow-2xl">
-                    {/* Top Bar */}
-                    <div className="sticky top-0 z-50 glass-panel border-b border-white/5 px-4 py-3 flex justify-between items-center">
+                <div className="bg-slate-900 h-screen max-w-md mx-auto relative shadow-2xl flex flex-col overflow-hidden">
+                    {/* Top Bar (Hidden for 3D page to give more space, or keep consistent) */}
+                    <div className="flex-shrink-0 z-50 glass-panel border-b border-white/5 px-4 py-3 flex justify-between items-center">
                         <div className="flex items-center gap-2">
                             <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-white text-xs">AS</div>
                             <span className="font-bold text-lg">2D3D Pro</span>
                         </div>
                         <div className="flex items-center gap-3">
-                             <div className="px-3 py-1 bg-slate-800 rounded-full text-xs font-bold text-yellow-400 border border-yellow-500/20">
-                                {user.coins.toLocaleString()} Ks
-                             </div>
+                             <div className="px-3 py-1 bg-slate-800 rounded-full text-xs font-bold text-yellow-400 border border-yellow-500/20">{user.coins.toLocaleString()} Ks</div>
                              <Icon name="bell" size={20} className="text-slate-400" />
                         </div>
                     </div>
 
-                    {/* Content */}
-                    <main className="min-h-screen">
+                    {/* Content Area */}
+                    <main className="flex-1 relative overflow-hidden">
                         {renderPage()}
                     </main>
 
@@ -476,10 +676,7 @@
                             <NavItem id="home" icon="home" label="ပင်မ" />
                             <NavItem id="live" icon="radio" label="Live 2D" />
                             <div className="relative -top-5">
-                                <button 
-                                    onClick={() => setActiveTab("home")}
-                                    className="w-14 h-14 bg-gradient-to-r from-blue-600 to-cyan-500 rounded-full flex items-center justify-center text-white shadow-lg shadow-blue-500/50 border-4 border-slate-900"
-                                >
+                                <button onClick={() => setActiveTab("home")} className="w-14 h-14 bg-gradient-to-r from-blue-600 to-cyan-500 rounded-full flex items-center justify-center text-white shadow-lg shadow-blue-500/50 border-4 border-slate-900">
                                     <Icon name="plus" size={28} />
                                 </button>
                             </div>
